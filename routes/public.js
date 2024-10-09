@@ -53,7 +53,7 @@ router.podt('/login', async (reg, res)=>{
     )
 
     // gera o token jwt
-    const token = jwt.sign({id: user.id}, jwt_secret,{expiresIn:'in'})
+    const token = jwt.sign({id: user.id}, jwt_secret,{expiresIn:'2m'})
     res.status(200).json(token)
 
   } catch(err){
