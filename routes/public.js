@@ -29,15 +29,19 @@ router.post("/cadastro", async (req, res) => {
     res.status(500).json({ messege: "Erro no servidaor, Tente novamente" });
   }
 });
+
+
+
+
 //login
 
 router.post("/login", async (req, res) => {
   try {
-    const userinfo = req.body;
+    const userInfo = req.body;
 
     //faz a busca no banco o email único
     const user = await prisma.user.findUnique({
-      where: { email: userinfo.email },
+      where: { email: userInfo.email },
     });
 
     //Faz a verificação se existe um usuário no banco
@@ -47,7 +51,7 @@ router.post("/login", async (req, res) => {
 
 
     //Faz a comparação de senah com a senha qeue o usuário colocou
-    const isMatch = await bcrypt.compare(userinfo.password, user.password)
+    const isMatch = await bcrypt.compare(userInfo.password, user.password)
 
     if(!isMatch){
       return res.status(400).json({ message: " Senha Inválida"})
