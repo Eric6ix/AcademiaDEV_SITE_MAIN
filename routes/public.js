@@ -1,64 +1,68 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';/*NEW!*/ //npm install jsonwebtoken
-const jwt_secret = process.env.JWT_secret
+import jwt from 'jsonwebtoken';
+
+import { PrismaClient } from "@prisma/client";
+
+
+const prisma = new PrismaClient();
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET
 
 //Cadastro
 router.post("/cadastro", async (req, res) => {
   try {
     const user = req.body;
 
-    const slat = await bcrypt.genSalt(10)
-    const hashPassword = await bcrypt.hash(user.password)
-
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(user.password, salt);
 
     const userDB = await prisma.user.create({
       data: {
         email: user.email,
-        name: user.name,
-        password,
+        name: user.nome,
+        password: hashPassword,
       },
     });
-    res.status(201).json(user);
+    res.status(201).json(userDB);
   } catch (err) {
-    res.status(500).json({ message: "Erro no servidor, tente novamente" });
+    res.status(500).json({ messege: "Erro no servidaor, Tente novamente" });
   }
 });
+//login
 
+router.post("/login", async (req, res) => {
+  try {
+    const userinfo = req.body;
 
-// loguin
-router.podt('/login', async (reg, res)=>{
-  try{
-    const userInfo = req.cody
-
-    //busca o usuario existe dentro do banco
-
+    //faz a busca no banco o email único
     const user = await prisma.user.findUnique({
-      where: {email: userInfo.email},
-    })
+      where: { email: userinfo.email },
+    });
 
-    //verifica se o usuario existe dentro do banco
-
-    if (!user){
-      return res.status(404).json({message: "usuario não encontrado"})
+    //Faz a verificação se existe um usuário no banco
+    if(!user){
+      return res.status(404).json({message: "Usuário não encontrado"})
     }
 
-    //compara a senha do banco com a que o usuario digitou
 
-    const isMath = await bcrypt.compare(userInfo.password, user.password)
+    //Faz a comparação de senah com a senha qeue o usuário colocou
+    const isMatch = await bcrypt.compare(userinfo.password, user.password)
 
-    if (!isMath)(
-      /*return*/ res.status(400).json({message: 'Senha invalida'})
-    )
+    if(!isMatch){
+      return res.status(400).json({ message: " Senha Inválida"})
+    }
 
-    // gera o token jwt
-    const token = jwt.sign({id: user.id}, jwt_secret,{expiresIn:'2m'})
+
+    //Geração do Token JWC
+
+    const token = jwt.sign({id: user.id}, JWT_SECRET, { expiresIn: '1m'})
+
+
     res.status(200).json(token)
-
-  } catch(err){
-    res.status(500).json({ message: "Erro no servidor, tente novamente" })
+  } catch (err) {
+    res.status(500).json({ messege: "Erro no servidaor, Tente novamente" });
   }
-})
+});
 
 export default router;
