@@ -13,20 +13,20 @@ const JWT_SECRET = process.env.JWT_SECRET
 router.post("/cadastro", async (req, res) => {
   try {
     const user = req.body;
-
+ 
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(user.password, salt);
 
     const userDB = await prisma.user.create({
       data: {
-        name: user.nome,
+        name: user.name,
         email: user.email,
         password: hashPassword,
       },
     });
     res.status(201).json(userDB);
   } catch (err) {
-    res.status(500).json({ messege: "Erro no servidaor, Tente novamente" });
+    res.status(500).json({ messege: `Erro no servidaor, Tente novamente ${err}` });
   }
 });
 
