@@ -60,7 +60,7 @@ router.post("/login", async (req, res) => {
 
     //Geração do Token JWC
 
-    const token = jwt.sign({id: user.id}, JWT_SECRET, { expiresIn: '1m'})
+    const token = jwt.sign({id: user.id}, JWT_SECRET, { expiresIn: '20d'})
 
 
     res.status(200).json(token)
